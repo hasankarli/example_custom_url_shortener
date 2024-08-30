@@ -1,0 +1,14 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.hasankarli.exampleCustomUrlShortener",
+      "sha256_cert_fingerprints":
+      [
+        "AA:B1:91:FE:EF:92:25:39:DC:88:E2:8D:B5:93:4F:79:30:19:F5:3E:54:08:BC:8B:B5:DB:FF:D2:74:6E:D3:31",
+        "D6:0B:46:10:71:B5:B4:D7:A4:37:C3:F7:D5:F0:E7:2E:10:74:D4:57:9A:D1:FF:9C:65:6F:01:64:EA:37:46:7E"
+      ]
+    }
+  }
+]

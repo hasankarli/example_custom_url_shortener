@@ -1,0 +1,166 @@
+---
+import { child, get, ref } from 'firebase/database';
+import database from '../../firebase/database';
+
+
+export const prerender = false;
+
+// Get the shortId from the route params
+const { shortId } = Astro.params;
+
+// Fetch the data from Firebase Realtime Database
+const fetchData = async (shortId: String) => {
+    const dbRef = ref(database);
+    const response = await get(child(dbRef, `short-links/${shortId}`));
+    const data = response.val();
+    return data;
+};
+
+let title = '';
+let description = '';
+let imageUrl = '';
+let originalLink = '';
+
+const data = await fetchData(shortId);
+
+if (data) {
+    title = data.title;
+    description = data.description;
+    imageUrl = data.imageUrl;
+    originalLink = data.originalLink;
+}
+
+
+const userAgent = Astro.request.headers.get('user-agent');
+let fallbackUrl = '';
+
+// Detect platform and determine the fallback URL
+if (/android/i.test(userAgent)) {
+  fallbackUrl = data.androidPackageName ?  `https://play.google.com/store/apps/details?id=${data.androidPackageName}` : 'https://examplecustomurlshortener-hasankarlis-projects.vercel.app';
+} else if (/iphone|ipad|ipod/i.test(userAgent)) {
+  fallbackUrl =  data.iosBundleId ? `https://apps.apple.com/app/${data.iosBundleId}` : 'https://examplecustomurlshortener-hasankarlis-projects.vercel.app';
+}
+
+
+const htmlContent = `
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${title}</title>
+
+        <link rel="manifest" href="/manifest.json">
+
+        <!-- Meta Tags for SEO -->
+        <meta name="title" content="${title}" />
+        <meta name="description" content="${description}" />
+
+        <!-- Twitter Card Meta Tags -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="${title}" />
+        <meta name="twitter:description" content="${description}" />
+        <meta name="twitter:image" content="${imageUrl}" />
+
+        <!-- Open Graph Meta Tags -->
+        <meta property="og:title" content="${title}" />
+        <meta property="og:description" content="${description}" />
+        <meta property="og:image" content="${imageUrl}" />
+        <meta property="og:url" content="${originalLink}" />
+        <meta property="og:type" content="website" />
+      </head>
+      <body>
+        <div id="link-preview">
+          <h1>${title}</h1>
+          <p>${description}</p>
+          <img src="${imageUrl}" alt="Image Preview" />
+        </div>
+
+           
+
+
+       <script>
+          window.onload = async function() {
+          const userAgent = navigator.userAgent.toLowerCase();
+          const isAndroid = userAgent.includes('android');
+          const isIOS = /iphone|ipad|ipod/.test(userAgent);
+
+            if (isAndroid || isIOS) {
+              if ('getInstalledRelatedApps' in navigator) {
+                try {
+                  const relatedApps = await navigator.getInstalledRelatedApps();
+                  
+                  if (relatedApps.length > 0) {
+                    // App is installed, redirect to the app
+                    window.location = '${originalLink}';
+                  } else {
+                    // App is not installed, fallback to the app store
+                    window.location = '${fallbackUrl}';
+                  }
+                } catch (error) {
+                  console.error('Error checking related apps:', error);
+                  // Fallback to the app store if there's an error
+                  window.location = '${fallbackUrl}';
+                }
+              } else {
+                window.location = '${fallbackUrl}';
+              }
+            }
+          };
+        </script>
+      </body>
+    </html>
+  `;
+
+
+
+  
+  if (originalLink) {
+  let base64 = Buffer.from(originalLink).toString('base64');
+    return new  Response(
+        htmlContent, {
+        status: 200,
+        headers: {
+            'Content-Type': 'text/html',
+            'Location': base64
+        },
+    });
+} else {
+    return new Response('Not Found', { status: 404 });
+}
+
+---
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+
+    <!-- Meta Tags for SEO -->
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:url" content={originalLink} />
+    <meta property="og:type" content="website" />
+</head>
+
+<body>
+    <div id="link-preview">
+      <h1>${title}</h1>
+      <p>${description}</p>
+      <img src="${imageUrl}" alt="Image Preview" />
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,11 @@
+{
+    "applinks":{
+       "apps":[],
+       "details":[
+          {
+             "appID":"2QU5K89DAD.com.hasankarli.exampleCustomUrlShortener",
+             "paths":["*"]
+          }
+       ]
+    }
+}

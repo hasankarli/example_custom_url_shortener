@@ -1,4 +1,4 @@
-package com.example.example_custom_url_shortener
+package com.hasankarli.exampleCustomUrlShortener
 
 import io.flutter.embedding.android.FlutterActivity
 

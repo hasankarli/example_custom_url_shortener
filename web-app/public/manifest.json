@@ -1,0 +1,18 @@
+{
+  "name": "App Name",
+  "short_name": "App Name",
+  "start_url": "/",
+  "display": "standalone",
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.x.x(android package name)",
+      "id": "android package name"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://apps.apple.com/app/app name/id(app id)",
+      "id": "app id"
+    }
+  ]
+}
